@@ -1,0 +1,57 @@
+[project]
+name = "weather"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "daniel.perebinos@ebs-integrator.com", email = "daniel.perebinos@ebs-integrator.com" }
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.2"
+pre-commit = "^4.2.0"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py311"
+exclude = [
+    "*/migrations/*"
+]
+
+lint.select = [
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "I", # isort
+    "B", # flake8-bugbear
+    "ASYNC", # flake8-async
+    "T10", # flake8-debugger
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "PIE", # flake8-pie
+    "BLE", # flake8-blind-except
+    "SIM", # flake8-simplify
+    "PTH", # flake8-use-pathlib
+    "FIX", # flake8 - fix me
+    "N", # pep8-naming
+    "UP", # pyupgrade
+]
+lint.ignore = [
+    "ISC001", # Disabled to avoid unexpected behaviour on `ruff format .`
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

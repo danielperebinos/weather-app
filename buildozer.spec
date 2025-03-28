@@ -18,7 +18,7 @@ icon.filename = assets/icon.png
 source.include_exts = py, kv
 
 # Include necessary files
-source.include_patterns = main.py, api.py, weather.kv
+source.include_patterns = main.py, api.py, weather.kv, assets/*
 
 # Target platforms (for most Android devices)
 android.archs = arm64-v8a, armeabi-v7a
@@ -38,9 +38,6 @@ android.allow_cleartext = True
 
 # Dependencies
 requirements = python3, kivy, kivymd, plyer
-
-# Include all asset files (images, icons, splash screens, etc.)
-source.include_patterns = assets/*
 
 # Presplash screen (displayed on app startup)
 android.presplash_color = "#000000"

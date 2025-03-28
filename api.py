@@ -1,21 +1,10 @@
-import os
-
-import requests
-from dotenv import load_dotenv
-
-load_dotenv()
+from kivy.network.urlrequest import UrlRequest
 
 
 class WeatherClient:
-    def __init__(self, api_key: str):
-        if not api_key:
-            raise ValueError("API Key is required.")
-        self.__api_key = api_key
+    def __init__(self):
+        self.__api_key = "2454f2838b30710dfae811ee76609228"
         self.base_url = "http://api.openweathermap.org/data/2.5/weather"
-
-    @classmethod
-    def from_environment(cls):
-        return cls(api_key=os.getenv("OPENWEATHER_API_KEY"))
 
     def __parse_weather_data(self, data: dict) -> dict:
         main_data = data.get("main", {})
@@ -30,51 +19,59 @@ class WeatherClient:
             "country": data.get("sys", {}).get("country"),
         }
 
-    def get_weather(self, city_name: str) -> dict:
+    def get_weather(self, city_name: str, on_success, on_error):
         if not city_name:
             raise ValueError("City name cannot be empty.")
 
         url = f"{self.base_url}?appid={self.__api_key}&q={city_name}&units=metric"
 
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
+        def handle_success(request, result):
+            try:
+                if result.get("cod") != 200:
+                    raise ValueError(f"API Error: {result.get('message', 'Unknown error')}")
+                weather_data = self.__parse_weather_data(result)
+                on_success(weather_data)
+            except Exception as e:
+                on_error(str(e))
 
-            if data.get("cod") != 200:
-                raise ValueError(f"API Error: {data.get('message', 'Unknown error')}")
+        def handle_error(request, error):
+            on_error(f"Network error: {error}")
 
-            return self.__parse_weather_data(data)
+        UrlRequest(url, on_success=handle_success, on_error=handle_error)
 
-        except requests.RequestException as exc:
-            raise ConnectionError(f"Network error: {exc}") from exc
-        except ValueError as exc:
-            raise ValueError(exc) from exc
-
-    def ping(self) -> bool:
+    def ping(self, on_success, on_error):
         url = f"{self.base_url}?appid={self.__api_key}&q=London"
 
-        try:
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            return True
-        except requests.RequestException:
-            return False
+        def handle_success(request, result):
+            if result.get("cod") == 200:
+                on_success(True)
+            else:
+                on_success(False)
+
+        def handle_error(request, error):
+            on_error(f"Network error: {error}")
+
+        UrlRequest(url, on_success=handle_success, on_error=handle_error)
 
 
-# Example Usage
+# Exemplu de utilizare
 if __name__ == "__main__":
+    def print_weather(data):
+        print(f"\nWeather in {data['city']}, {data['country']}:")
+        print(f" - Temperature: {data['temperature']} °C")
+        print(f" - Pressure: {data['pressure']} hPa")
+        print(f" - Humidity: {data['humidity']}%")
+        print(f" - Description: {data['description']}")
+
+
+    def print_error(error_message):
+        print(f"Error: {error_message}")
+
+
     try:
         api_key = "2454f2838b30710dfae811ee76609228"
         client = WeatherClient(api_key)
-
         city_name = input("Enter city name: ")
-        weather_data = client.get_weather(city_name)
-
-        print(f"\nWeather in {weather_data['city']}, {weather_data['country']}:")
-        print(f" - Temperature: {weather_data['temperature']} °C")
-        print(f" - Pressure: {weather_data['pressure']} hPa")
-        print(f" - Humidity: {weather_data['humidity']}%")
-        print(f" - Description: {weather_data['description']}")
-    except (ValueError, ConnectionError) as e:
-        print(f"Error: {e}")
+        client.get_weather(city_name, print_weather, print_error)
+    except ValueError as e:
+        print_error(str(e))

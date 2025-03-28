@@ -33,22 +33,41 @@ ScreenManager:
 
 <HomeScreen>:
     name: "home"
+
+    canvas.before:
+        Rectangle:
+            source: "assets/bk2.png"
+            size: self.size
+            pos: self.pos
+
     MDBoxLayout:
         orientation: 'vertical'
         spacing: dp(20)
         padding: dp(20)
 
-        MDLabel:
-            text: "🌤 Weather App"
-            halign: "center"
-            font_style: "H4"
-            theme_text_color: "Primary"
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(10)
+            pos_hint: {"center_x": 0.5}
+
+            Image:
+                source: "assets/loading.png"
+                size_hint: None, None
+                size: dp(75), dp(75)
+
+            MDLabel:
+                text: "Weather App"
+                halign: "left"
+                font_style: "H4"
+                theme_text_color: "Primary"
 
         MDTextField:
             id: city_input
             size_hint_x: 0.9
             pos_hint: {"center_x": 0.5}
-            mode: "rectangle"
+            mode: "fill"  # Înlocuiește cu fill sau outlined
+            hint_text: "Enter city name"
             icon_right: "magnify"
 
         MDRaisedButton:
@@ -58,40 +77,12 @@ ScreenManager:
             md_bg_color: app.theme_cls.primary_color
             on_release: root.get_weather()
 
-        MDSpinner:
-            id: spinner
-            size_hint: None, None
-            size: dp(46), dp(46)
-            pos_hint: {"center_x": 0.5}
-            active: False
-
         MDCard:
             id: weather_card
             size_hint_x: 0.9
             pos_hint: {"center_x": 0.5}
             padding: dp(20)
-            elevation: 4
+            elevation: 0
             orientation: 'vertical'
-            md_bg_color: app.theme_cls.bg_normal
+            md_bg_color: (0, 0, 0, 0)  # Transparent
             opacity: 0
-
-        FitImage:
-            id: weather_icon
-            source: ""
-            size_hint_y: None
-            height: dp(100)
-            pos_hint: {"center_x": 0.5}
-
-        MDLabel:
-            id: weather_label
-            text: "Weather information will appear here"
-            align: "center"
-            theme_text_color: "Secondary"
-            font_style: "Body1"
-            canvas.before:
-                Color:
-                    rgba: app.theme_cls.bg_normal
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
-

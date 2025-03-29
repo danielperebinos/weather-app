@@ -2,12 +2,15 @@ import threading
 
 from kivy import platform
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen
 from kivymd.app import MDApp
-from kivymd.uix.datatables import MDDataTable
+from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.label import MDLabel
 
 from api import WeatherClient
 
@@ -25,6 +28,8 @@ if platform == "android":
 
 
     request_internet_permission()
+
+Window.size = (360, 620)
 
 
 class LoadingScreen(Screen):
@@ -72,26 +77,43 @@ class HomeScreen(Screen):
             # Clear previous data
             self.ids.weather_card.clear_widgets()
 
-            # Display data using MDDataTable
-            data_table = MDDataTable(
-                size_hint=(1, 1),
-                use_pagination=False,
-                rows_num=1,
-                column_data=[
-                    ("City", dp(30)),
-                    ("Country", dp(30)),
-                    ("Temperature (°C)", dp(30)),
-                    ("Weather", dp(30)),
-                ],
-                row_data=[
-                    (city, country, str(temperature), description),
-                ],
-                background_color_header=(0, 0, 0, 0.1),
-                background_color_cell=(0, 0, 0, 0.1),
-                background_color_selected_cell=(0, 0, 0, 0.0),
+            data_labels = ["City", "Country", "Temperature (°C)", "Weather"]
+            data_values = [city, country, str(temperature), description]
+
+            grid = MDGridLayout(
+                cols=2,
+                size_hint=(1, None),
+                height=dp(150),
+                spacing=dp(10)
             )
 
-            self.ids.weather_card.add_widget(data_table)
+            for label, value in zip(data_labels, data_values, strict=False):
+                header_label = MDLabel(
+                    text=label,
+                    theme_text_color="Secondary",
+                    halign="right",
+                    size_hint_x=None,
+                    width=dp(120)
+                )
+                grid.add_widget(header_label)
+
+                value_label = MDLabel(
+                    text=value,
+                    theme_text_color="Primary",
+                    halign="left"
+                )
+                grid.add_widget(value_label)
+
+            card = MDCard(
+                size_hint=(1, None),
+                height=dp(200),
+                elevation=4,
+                padding=dp(20),
+                md_bg_color=(0.95, 0.95, 0.95, 1)
+            )
+            card.add_widget(grid)
+
+            self.ids.weather_card.add_widget(card)
             self.ids.weather_card.opacity = 1
 
         def on_error(error_message):
